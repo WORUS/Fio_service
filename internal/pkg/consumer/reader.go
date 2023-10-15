@@ -10,12 +10,6 @@ import (
 	kafkago "github.com/segmentio/kafka-go"
 )
 
-type User struct {
-	Name       string `json:"name" binding:"required"`
-	Surname    string `json:"surname" binding:"required"`
-	Patronymic string `json:"patronymic"`
-}
-
 type Reader struct {
 	Reader *kafkago.Reader
 }
@@ -49,6 +43,7 @@ func (k *Reader) FetchMessageKafka(ctx context.Context, messages chan kafkago.Me
 				continue
 			}
 			log.Printf("\nname: %s, surname: %s", user.Name, user.Surname)
+			user.Enrich()
 		}
 
 	}

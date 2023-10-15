@@ -23,15 +23,12 @@ func main() {
 	g.Go(func() error {
 		return reader.FetchMessageKafka(ctx, messages)
 	})
-
 	g.Go(func() error {
 		return writer.WriteMessages(ctx, messages, messageCommitChan)
 	})
-
 	g.Go(func() error {
 		return reader.CommitMessages(ctx, messageCommitChan)
 	})
-
 	err := g.Wait()
 	if err != nil {
 		log.Fatalln(err)
