@@ -1,4 +1,4 @@
-module fio-service
+module fio
 
 go 1.21.0
 

@@ -1,9 +1,11 @@
-package user
+package fio
+
+import (
+	"fio/pkg/consumer"
+)
 
 type User struct {
-	Name        string `json:"name" binding:"required"`
-	Surname     string `json:"surname" binding:"required"`
-	Patronymic  string `json:"patronymic"`
+	cons        consumer.User
 	Age         string `json:"age"`
 	Gender      string `json:"gender"`
 	Nationality string `json:"nationality"`

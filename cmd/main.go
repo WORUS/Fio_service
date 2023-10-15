@@ -2,15 +2,17 @@ package main
 
 import (
 	"context"
-	kafka "fio-service/pkg/consumer"
+	"fio/pkg/consumer"
+
+	"log"
+
 	kafkago "github.com/segmentio/kafka-go"
 	"golang.org/x/sync/errgroup"
-	"log"
 )
 
 func main() {
-	reader := kafka.NewKafkaReader()
-	//writer := kafka.NewKafkaWriter()
+	reader := consumer.NewKafkaReader()
+	writer := consumer.NewKafkaWriter()
 
 	ctx := context.Background()
 	messages := make(chan kafkago.Message, 1000)
@@ -19,12 +21,12 @@ func main() {
 	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		return reader.FetchMessage(ctx, messages)
+		return reader.FetchMessageKafka(ctx, messages)
 	})
 
-	// g.Go(func() error {
-	// 	return writer.WriteMessages(ctx, messages, messageCommitChan)
-	// })
+	g.Go(func() error {
+		return writer.WriteMessages(ctx, messages, messageCommitChan)
+	})
 
 	g.Go(func() error {
 		return reader.CommitMessages(ctx, messageCommitChan)
