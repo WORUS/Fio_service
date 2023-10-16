@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"fio/internal/consumer"
+	"fio/internal/pkg/repository"
+	"os"
 
 	"log"
 
 	kafkago "github.com/segmentio/kafka-go"
+	"github.com/spf13/viper"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -34,21 +37,21 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	// db, err := repository.NewPostgresDB(repository.Config{
-	// 	Host:     viper.GetString("db.host"),
-	// 	Port:     viper.GetString("db.port"),
-	// 	Username: viper.GetString("db.username"),
-	// 	Password: os.Getenv("DB_PASSWORD"),
-	// 	DBName:   viper.GetString("db.dbname"),
-	// 	SSLMode:  viper.GetString("db.sslmode"),
-	// })
+	db, err := repository.NewPostgresDB(repository.Config{
+		Host:     viper.GetString("db.host"),
+		Port:     viper.GetString("db.port"),
+		Username: viper.GetString("db.username"),
+		Password: os.Getenv("DB_PASSWORD"),
+		DBName:   viper.GetString("db.dbname"),
+		SSLMode:  viper.GetString("db.sslmode"),
+	})
 
-	// if err != nil {
-	// 	log.Fatalf("failed to initialize db: %s", err.Error())
-	// }
+	if err != nil {
+		log.Fatalf("failed to initialize db: %s", err.Error())
+	}
 
-	// repos := repository.NewRepository(db)
-	// services := service.NewService(repos)
-	// handler.NewHandler(services)
+	repos := repository.NewRepository(db)
+	services := service.NewService(repos)
+	handler.NewHandler(services)
 
 }
