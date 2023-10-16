@@ -3,7 +3,7 @@ package consumer
 import (
 	"context"
 	"encoding/json"
-
+	. "fio"
 	"log"
 
 	"github.com/pkg/errors"
@@ -37,13 +37,12 @@ func (k *Reader) FetchMessageKafka(ctx context.Context, messages chan kafkago.Me
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			user := User{}
-			if ok := user.checkFormat(&message); !ok {
+			var client Client
+			if ok := checkFormat(&message, &client); !ok {
 				messages <- message
 				continue
 			}
-			log.Printf("\nname: %s, surname: %s", user.Name, user.Surname)
-			user.Enrich()
+			log.Printf("\nname: %s, surname: %s", client.Name, client.Surname)
 		}
 
 	}
@@ -63,8 +62,8 @@ func (k *Reader) CommitMessages(ctx context.Context, messageCommitChan <-chan ka
 	}
 }
 
-func (u *User) checkFormat(msg *kafkago.Message) bool {
-	err := json.Unmarshal(msg.Value, &u)
+func checkFormat(msg *kafkago.Message, c *Client) bool {
+	err := json.Unmarshal(msg.Value, &c)
 	if err != nil {
 		log.Printf("\nerror decoding kafka message: %v", err)
 		if e, ok := err.(*json.SyntaxError); ok {
@@ -75,8 +74,13 @@ func (u *User) checkFormat(msg *kafkago.Message) bool {
 		msg.Value = append(msg.Value, note...)
 		return false
 	}
-	if u.Name == "" || u.Surname == "" {
+	if c.Name == "" || c.Surname == "" {
 		note := []byte(` {"error":"no required field"}`)
+		msg.Value = append(msg.Value, note...)
+		return false
+	}
+	if err := Enrich(c); err != nil {
+		note := []byte(` {"error":"invalid name"}`)
 		msg.Value = append(msg.Value, note...)
 		return false
 	}
