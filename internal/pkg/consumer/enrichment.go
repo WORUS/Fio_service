@@ -59,7 +59,7 @@ func GetJSON(url string, inter interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(inter)
 }
 
-func Enrich(client *Client) error {
+func (c *Consumer) Enrich(client *Client) (*Client, error) {
 	var nation NationalityAPI
 	var gender GenderAPI
 	var age AgeAPI
@@ -70,26 +70,26 @@ func Enrich(client *Client) error {
 
 	if err := GetAge(client.Name, &age); err != nil {
 		log.Print(err.Error())
-		return err
+		return client, err
 	}
 	if age.Age == 0 {
-		return errors.New("invalid name")
+		return client, errors.New("invalid name")
 	}
 
 	if err := GetGender(client.Name, &gender); err != nil {
 		log.Print(err.Error())
-		return err
+		return client, err
 	}
 	if gender.Gender == "" {
-		return errors.New("invalid name")
+		return client, errors.New("invalid name")
 	}
 
 	if err := GetNationality(client.Name, &nation); err != nil {
 		log.Print(err.Error())
-		return err
+		return client, err
 	}
 	if nation.Country == nil {
-		return errors.New("invalid name")
+		return client, errors.New("invalid name")
 	}
 
 	client = &Client{
@@ -101,8 +101,8 @@ func Enrich(client *Client) error {
 		CountryId:  nation.Country[0].CountryId,
 	}
 
-	fmt.Printf("Name: %s,\nSurname: %s,\nAge: %d,\nGender: %s,\nCountry: %s",
+	fmt.Printf("\nName: %s,\nSurname: %s,\nAge: %d,\nGender: %s,\nCountry: %s\n",
 		client.Name, client.Surname, client.Age, client.Gender, client.CountryId)
 
-	return nil
+	return client, nil
 }

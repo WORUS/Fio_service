@@ -1,4 +1,4 @@
-package consumer
+package kafka
 
 import (
 	"context"
@@ -10,21 +10,17 @@ type Writer struct {
 	Writer *kafkago.Writer
 }
 
-func NewKafkaWriter() *Writer {
-	writer := &kafkago.Writer{
+func NewKafkaWriter() *kafkago.Writer {
+	return &kafkago.Writer{
 		Addr:  kafkago.TCP("localhost:9092"),
 		Topic: "fio_failed",
 	}
-	return &Writer{
-		Writer: writer,
-	}
 }
 
-func (k *Writer) WriteMessages(ctx context.Context, messages chan kafkago.Message, messageCommitChan chan kafkago.Message) error {
+func (k *Kafka) WriteMessages(ctx context.Context, messages chan kafkago.Message, messageCommitChan chan kafkago.Message) error {
 	for {
 		select {
 		case <-ctx.Done():
-			//continue
 			return ctx.Err()
 		case m := <-messages:
 			err := k.Writer.WriteMessages(ctx, kafkago.Message{

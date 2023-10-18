@@ -6,8 +6,7 @@ import (
 )
 
 type Record interface {
-	CreateClient(Client Client) (int, error)
-	GetClient()
+	CreateClient(client Client) (int, error)
 }
 
 type Service struct {
@@ -16,6 +15,6 @@ type Service struct {
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		Record: NewClientService(repos.Client),
+		Record: NewRecordService(repos.Record),
 	}
 }

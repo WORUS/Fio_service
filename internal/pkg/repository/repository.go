@@ -8,7 +8,6 @@ import (
 
 type Record interface {
 	CreateClient(client Client) (int, error)
-	GetClientByName()
 }
 
 type Repository struct {
@@ -17,7 +16,7 @@ type Repository struct {
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Record: NewClientPostgres(db),
+		Record: NewRecordPostgres(db),
 	}
 
 }

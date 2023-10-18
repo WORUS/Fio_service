@@ -1,49 +1,28 @@
 package main
 
 import (
-	"context"
-	"fio/internal/consumer"
+	"fio/internal/pkg/consumer"
+	"fio/internal/pkg/kafka"
 	"fio/internal/pkg/repository"
+	"fio/internal/pkg/service"
+	"log"
 	"os"
 
-	"log"
-
-	kafkago "github.com/segmentio/kafka-go"
-	"github.com/spf13/viper"
-	"golang.org/x/sync/errgroup"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	reader := consumer.NewKafkaReader()
-	writer := consumer.NewKafkaWriter()
-
-	ctx := context.Background()
-	messages := make(chan kafkago.Message, 1000)
-	messageCommitChan := make(chan kafkago.Message, 1000)
-
-	g, ctx := errgroup.WithContext(ctx)
-
-	g.Go(func() error {
-		return reader.FetchMessageKafka(ctx, messages)
-	})
-	g.Go(func() error {
-		return writer.WriteMessages(ctx, messages, messageCommitChan)
-	})
-	g.Go(func() error {
-		return reader.CommitMessages(ctx, messageCommitChan)
-	})
-	err := g.Wait()
-	if err != nil {
-		log.Fatalln(err)
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("error loading env variables: %s", err.Error())
 	}
 
 	db, err := repository.NewPostgresDB(repository.Config{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		Username: viper.GetString("db.username"),
-		Password: os.Getenv("DB_PASSWORD"),
-		DBName:   viper.GetString("db.dbname"),
-		SSLMode:  viper.GetString("db.sslmode"),
+		Host:     os.Getenv("db.host"),
+		Port:     os.Getenv("db.port"),
+		Username: os.Getenv("db.username"),
+		Password: os.Getenv("db.password"),
+		DBName:   os.Getenv("db.dbname"),
+		SSLMode:  os.Getenv("db.sslmode"),
 	})
 
 	if err != nil {
@@ -52,6 +31,12 @@ func main() {
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
-	handler.NewHandler(services)
+	consumer := consumer.NewConsumer(services)
+	kafka := kafka.NewKafka(consumer)
+
+	err = kafka.Start()
+	// if err != nil {
+	// 	log.Fatalf("failed to start kafka: %s", err.Error())
+	// }
 
 }
