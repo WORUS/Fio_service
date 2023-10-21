@@ -2,7 +2,7 @@ package kafka
 
 import (
 	"context"
-	. "fio"
+
 	"log"
 
 	"github.com/pkg/errors"
@@ -29,14 +29,13 @@ func (k *Kafka) FetchMessageKafka(ctx context.Context, messages chan kafkago.Mes
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			var client Client
-			message, ok := k.consumer.CheckKafkaMessage(message, &client)
+			client, message, ok := k.consumer.CheckKafkaMessage(message)
 			if !ok {
 				messages <- message
 				continue
 			}
-			log.Printf("name: %s, surname: %s, age: %d, gender: %s", client.Name, client.Surname, client.Age, client.Gender)
-			//k.consumer.CreateClient(client)
+			log.Printf("name: %s, surname: %s, patronymic: %s, age: %d, gender: %s", client.Name, client.Surname, client.Patronymic, client.Age, client.Gender)
+			k.consumer.CreateClient(client)
 		}
 
 	}

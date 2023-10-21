@@ -1,0 +1,1 @@
+bin/windows/kafka-console-producer.bat --topic fio --bootstrap-server localhost:9092

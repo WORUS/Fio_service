@@ -59,7 +59,7 @@ func GetJSON(url string, inter interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(inter)
 }
 
-func (c *Consumer) Enrich(client *Client) (*Client, error) {
+func (c *Consumer) Enrich(client Client) (Client, error) {
 	var nation NationalityAPI
 	var gender GenderAPI
 	var age AgeAPI
@@ -92,7 +92,7 @@ func (c *Consumer) Enrich(client *Client) (*Client, error) {
 		return client, errors.New("invalid name")
 	}
 
-	client = &Client{
+	enrichedClient := Client{
 		Name:       client.Name,
 		Surname:    client.Surname,
 		Patronymic: client.Patronymic,
@@ -102,7 +102,7 @@ func (c *Consumer) Enrich(client *Client) (*Client, error) {
 	}
 
 	fmt.Printf("\nName: %s,\nSurname: %s,\nAge: %d,\nGender: %s,\nCountry: %s\n",
-		client.Name, client.Surname, client.Age, client.Gender, client.CountryId)
+		enrichedClient.Name, enrichedClient.Surname, enrichedClient.Age, enrichedClient.Gender, enrichedClient.CountryId)
 
-	return client, nil
+	return enrichedClient, nil
 }

@@ -25,7 +25,8 @@ func InitConsumer() {
 	//TODO: move cunsomer methods from kafka
 }
 
-func (c *Consumer) CheckKafkaMessage(msg kafkago.Message, client *Client) (kafkago.Message, bool) {
+func (c *Consumer) CheckKafkaMessage(msg kafkago.Message) (Client, kafkago.Message, bool) {
+	var client Client
 	err := json.Unmarshal(msg.Value, &client)
 	if err != nil {
 		log.Printf("error decoding kafka message: %v", err)
@@ -35,17 +36,18 @@ func (c *Consumer) CheckKafkaMessage(msg kafkago.Message, client *Client) (kafka
 		log.Printf("kafka message: %q", msg.Value)
 		note := []byte(` {"error":"incorrect format"}`)
 		msg.Value = append(msg.Value, note...)
-		return msg, false
+		return client, msg, false
 	}
 	if client.Name == "" || client.Surname == "" {
 		note := []byte(` {"error":"no required field"}`)
 		msg.Value = append(msg.Value, note...)
-		return msg, false
+		return client, msg, false
 	}
-	if _, err := c.Enrich(client); err != nil {
+	client, err = c.Enrich(client)
+	if err != nil {
 		note := []byte(` {"error":"invalid name"}`)
 		msg.Value = append(msg.Value, note...)
-		return msg, false
+		return client, msg, false
 	}
-	return msg, true
+	return client, msg, true
 }
