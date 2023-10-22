@@ -9,28 +9,27 @@ import (
 )
 
 type ClientFilter struct {
-	Name         []string
-	Surname      []string
-	Patronymic   []string
-	Age          []int
-	AgeIntervals []int
-	Gender       []string
-	CountryId    []string
+	Name       []string
+	Surname    []string
+	Patronymic []string
+	Age        []int
+	Gender     []string
+	CountryId  []string
 }
 
 func (h *Handler) GetClients(c *gin.Context) {
 	var filter ClientFilter
 	params := c.Request.URL.Query()
-	if val := strings.Split(params.Get("name"), ","); val != nil {
+	if val := strings.Split(params.Get("name"), ","); val[0] != "" {
 		filter.Name = val
 	}
-	if val := strings.Split(params.Get("surname"), ","); val != nil {
+	if val := strings.Split(params.Get("surname"), ","); val[0] != "" {
 		filter.Surname = val
 	}
-	if val := strings.Split(params.Get("patronymic"), ","); val != nil {
+	if val := strings.Split(params.Get("patronymic"), ","); val[0] != "" {
 		filter.Patronymic = val
 	}
-	if val := strings.Split(params.Get("age"), ","); len(val) != 0 {
+	if val := strings.Split(params.Get("age"), ","); val[0] != "" {
 		for i := range val {
 			intervals := strings.Split(val[i], "-")
 			if len(intervals) == 2 {
@@ -54,7 +53,6 @@ func (h *Handler) GetClients(c *gin.Context) {
 				}
 			} else {
 				res, err := strconv.Atoi(val[i])
-				//filter.Age[i], err = strconv.Atoi(val[i])
 				if err != nil {
 					newErrorResponse(c, http.StatusBadRequest, err.Error())
 					return
@@ -63,10 +61,10 @@ func (h *Handler) GetClients(c *gin.Context) {
 			}
 		}
 	}
-	if val := strings.Split(params.Get("gender"), ","); val != nil {
+	if val := strings.Split(params.Get("gender"), ","); val[0] != "" {
 		filter.Gender = val
 	}
-	if val := strings.Split(params.Get("country_id"), ","); val != nil {
+	if val := strings.Split(params.Get("country_id"), ","); val[0] != "" {
 		filter.CountryId = val
 	}
 

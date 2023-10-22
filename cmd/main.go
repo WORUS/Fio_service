@@ -2,9 +2,7 @@ package main
 
 import (
 	server "fio/internal/pkg"
-	"fio/internal/pkg/consumer"
 	"fio/internal/pkg/handler"
-	"fio/internal/pkg/kafka"
 	"fio/internal/pkg/repository"
 	"fio/internal/pkg/service"
 	"log"
@@ -33,9 +31,9 @@ func main() {
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
-	consumer := consumer.NewConsumer(services)
+	//consumer := consumer.NewConsumer(services)
 	handler := handler.NewHandler(services)
-	kafka := kafka.NewKafka(consumer)
+	//kafka := kafka.NewKafka(consumer)
 	srv := new(server.Server)
 
 	go func() {
@@ -44,9 +42,9 @@ func main() {
 		}
 	}()
 
-	err = kafka.Start()
-	if err != nil {
-		log.Fatalf("failed to start kafka consumer: %s", err.Error())
-	}
+	//err = kafka.Start()
+	// if err != nil {
+	// 	log.Fatalf("failed to start kafka consumer: %s", err.Error())
+	// }
 
 }
