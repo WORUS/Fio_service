@@ -8,7 +8,7 @@ import (
 
 type Record interface {
 	CreateClient(client Client) (int, error)
-	GetClientsByFilter(sql string) ([]Client, error)
+	GetClientsByFilter(sql string, page int) ([]Client, error)
 }
 
 type Repository struct {

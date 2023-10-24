@@ -9,8 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	defaultPage = 1
+)
+
 func (h *Handler) GetClients(c *gin.Context) {
 	var filter ClientFilter
+	var page int
 	params := c.Request.URL.Query()
 	if val := strings.Split(params.Get("name"), ","); val[0] != "" {
 		filter.Name = val
@@ -51,7 +56,22 @@ func (h *Handler) GetClients(c *gin.Context) {
 	if val := strings.Split(params.Get("country_id"), ","); val[0] != "" {
 		filter.CountryId = val
 	}
-	clients, err := h.services.GetClientsByFilter(filter)
+
+	p := params.Get("p")
+	if p != "" {
+		parse, err := strconv.Atoi(p)
+		if err != nil {
+			newErrorResponse(c, http.StatusBadRequest, err.Error())
+			return
+		}
+		page = parse
+	} else {
+		page = defaultPage
+	}
+	if page < defaultPage {
+		page = defaultPage
+	}
+	clients, err := h.services.GetClientsByFilter(filter, page)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

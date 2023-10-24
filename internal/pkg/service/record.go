@@ -20,7 +20,7 @@ func (s *RecordService) CreateClient(client Client) (int, error) {
 	return s.repo.CreateClient(client)
 }
 
-func (s *RecordService) GetClientsByFilter(filter ClientFilter) ([]Client, error) {
+func (s *RecordService) GetClientsByFilter(filter ClientFilter, page int) ([]Client, error) {
 	var query []string
 	sql := ""
 
@@ -55,5 +55,5 @@ func (s *RecordService) GetClientsByFilter(filter ClientFilter) ([]Client, error
 			sql += " AND "
 		}
 	}
-	return s.repo.GetClientsByFilter(sql)
+	return s.repo.GetClientsByFilter(sql, page)
 }

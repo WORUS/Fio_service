@@ -7,7 +7,7 @@ import (
 
 type Record interface {
 	CreateClient(client Client) (int, error)
-	GetClientsByFilter(filter ClientFilter) ([]Client, error)
+	GetClientsByFilter(filter ClientFilter, page int) ([]Client, error)
 }
 
 type Service struct {

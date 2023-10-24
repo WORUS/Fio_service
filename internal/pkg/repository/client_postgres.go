@@ -26,18 +26,21 @@ func (r *RecordPostgres) CreateClient(client Client) (int, error) {
 	return id, nil
 }
 
-func (r *RecordPostgres) GetClientsByFilter(sql string) ([]Client, error) {
+func (r *RecordPostgres) GetClientsByFilter(sql string, page int) ([]Client, error) {
 	var clientSQL []ClientSQL
+	limit := 2
+	offset := limit * (page - 1)
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s", clientsTable, sql)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s LIMIT $2 OFFSET $1", clientsTable, sql)
 	log.Println(query)
-	err := r.db.Select(&clientSQL, query)
+	err := r.db.Select(&clientSQL, query, offset, limit)
 	if err != nil {
 		return nil, err
 	}
 
 	clients := make([]Client, len(clientSQL))
 	for i := range clientSQL {
+		clients[i].ID = int(clientSQL[i].ID.Int64)
 		clients[i].Name = clientSQL[i].Name.String
 		clients[i].Surname = clientSQL[i].Surname.String
 		clients[i].Patronymic = clientSQL[i].Patronymic.String
