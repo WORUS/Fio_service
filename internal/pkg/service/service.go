@@ -7,6 +7,7 @@ import (
 
 type Record interface {
 	CreateClient(client Client) (int, error)
+	GetClientsByFilter(filter ClientFilter) ([]Client, error)
 }
 
 type Service struct {

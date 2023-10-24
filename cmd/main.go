@@ -1,7 +1,7 @@
 package main
 
 import (
-	server "fio/internal/pkg"
+	server "fio"
 	"fio/internal/pkg/handler"
 	"fio/internal/pkg/repository"
 	"fio/internal/pkg/service"
@@ -36,15 +36,14 @@ func main() {
 	//kafka := kafka.NewKafka(consumer)
 	srv := new(server.Server)
 
-	go func() {
+	func() {
 		if err := srv.Run(os.Getenv("port"), handler.InitRoutes()); err != nil {
 			log.Fatalf("error occured while running http server: %s", err.Error())
 		}
 	}()
-
+	//fmt.Printf("HALLLLLLLO")
 	//err = kafka.Start()
 	// if err != nil {
 	// 	log.Fatalf("failed to start kafka consumer: %s", err.Error())
 	// }
-
 }

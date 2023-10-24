@@ -3,6 +3,7 @@ package repository
 import (
 	. "fio"
 	"fmt"
+	"log"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -25,10 +26,25 @@ func (r *RecordPostgres) CreateClient(client Client) (int, error) {
 	return id, nil
 }
 
-func (r *RecordPostgres) GetClients(username, password string) (Client, error) {
-	var user Client
-	query := fmt.Sprintf("SELECT id FROM %s WHERE username=$1 AND password_hash=$2", clientsTable)
-	err := r.db.Get(&user, query, username, password)
+func (r *RecordPostgres) GetClientsByFilter(sql string) ([]Client, error) {
+	var clientSQL []ClientSQL
 
-	return user, err
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s", clientsTable, sql)
+	log.Println(query)
+	err := r.db.Select(&clientSQL, query)
+	if err != nil {
+		return nil, err
+	}
+
+	clients := make([]Client, len(clientSQL))
+	for i := range clientSQL {
+		clients[i].Name = clientSQL[i].Name.String
+		clients[i].Surname = clientSQL[i].Surname.String
+		clients[i].Patronymic = clientSQL[i].Patronymic.String
+		clients[i].Age = int(clientSQL[i].Age.Int16)
+		clients[i].Gender = clientSQL[i].Gender.String
+		clients[i].CountryId = clientSQL[i].CountryId.String
+	}
+
+	return clients, nil
 }

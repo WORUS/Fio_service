@@ -1,21 +1,13 @@
 package handler
 
 import (
+	. "fio"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
-
-type ClientFilter struct {
-	Name       []string
-	Surname    []string
-	Patronymic []string
-	Age        []int
-	Gender     []string
-	CountryId  []string
-}
 
 func (h *Handler) GetClients(c *gin.Context) {
 	var filter ClientFilter
@@ -29,37 +21,29 @@ func (h *Handler) GetClients(c *gin.Context) {
 	if val := strings.Split(params.Get("patronymic"), ","); val[0] != "" {
 		filter.Patronymic = val
 	}
-	if val := strings.Split(params.Get("age"), ","); val[0] != "" {
-		for i := range val {
-			intervals := strings.Split(val[i], "-")
-			if len(intervals) == 2 {
-				firstValue, err := strconv.Atoi(intervals[0])
-				if err != nil {
-					newErrorResponse(c, http.StatusBadRequest, err.Error())
-					return
-				}
-				secondValue, err := strconv.Atoi(intervals[1])
-				if err != nil {
-					newErrorResponse(c, http.StatusBadRequest, err.Error())
-					return
-				}
-				if firstValue > secondValue {
-					temp := firstValue
-					firstValue = secondValue
-					secondValue = temp
-				}
-				for ; firstValue <= secondValue; firstValue++ {
-					filter.Age = append(filter.Age, firstValue)
-				}
-			} else {
-				res, err := strconv.Atoi(val[i])
-				if err != nil {
-					newErrorResponse(c, http.StatusBadRequest, err.Error())
-					return
-				}
-				filter.Age = append(filter.Age, res)
+	if val := strings.Split(params.Get("age"), "-"); val[0] != "" {
+		if len(val) == 2 {
+			firstValue, err := strconv.Atoi(val[0])
+			if err != nil {
+				newErrorResponse(c, http.StatusBadRequest, err.Error())
+				return
 			}
+			secondValue, err := strconv.Atoi(val[1])
+			if err != nil {
+				newErrorResponse(c, http.StatusBadRequest, err.Error())
+				return
+			}
+			if firstValue > secondValue {
+				temp := firstValue
+				firstValue = secondValue
+				secondValue = temp
+			}
+			filter.Age = append(filter.Age, firstValue, secondValue)
+		} else {
+			newErrorResponse(c, http.StatusBadRequest, "Error occured on invalid format: age")
+			return
 		}
+
 	}
 	if val := strings.Split(params.Get("gender"), ","); val[0] != "" {
 		filter.Gender = val
@@ -67,7 +51,11 @@ func (h *Handler) GetClients(c *gin.Context) {
 	if val := strings.Split(params.Get("country_id"), ","); val[0] != "" {
 		filter.CountryId = val
 	}
-
-	c.JSON(http.StatusOK, filter)
+	clients, err := h.services.GetClientsByFilter(filter)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, clients)
 
 }
