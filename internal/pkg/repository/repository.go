@@ -9,6 +9,8 @@ import (
 type Record interface {
 	CreateClient(client Client) (int, error)
 	GetClientsByFilter(sql string, page int) ([]Client, error)
+	UpdateClientRecord(id int, client ClientUpdate) error
+	DeleteClientById(id int) error
 }
 
 type Repository struct {

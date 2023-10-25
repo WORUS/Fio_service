@@ -4,6 +4,7 @@ import (
 	. "fio"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -31,7 +32,7 @@ func (r *RecordPostgres) GetClientsByFilter(sql string, page int) ([]Client, err
 	limit := 2
 	offset := limit * (page - 1)
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s LIMIT $2 OFFSET $1", clientsTable, sql)
+	query := fmt.Sprintf("SELECT * FROM %s%s LIMIT $2 OFFSET $1", clientsTable, sql)
 	log.Println(query)
 	err := r.db.Select(&clientSQL, query, offset, limit)
 	if err != nil {
@@ -50,4 +51,54 @@ func (r *RecordPostgres) GetClientsByFilter(sql string, page int) ([]Client, err
 	}
 
 	return clients, nil
+}
+
+func (r *RecordPostgres) UpdateClientRecord(id int, client ClientUpdate) error {
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argId := 1
+
+	if client.Name != nil {
+		setValues = append(setValues, fmt.Sprintf("name=$%d", argId))
+		args = append(args, *client.Name)
+		argId++
+	}
+	if client.Surname != nil {
+		setValues = append(setValues, fmt.Sprintf("surname=$%d", argId))
+		args = append(args, *client.Surname)
+		argId++
+	}
+	if client.Patronymic != nil {
+		setValues = append(setValues, fmt.Sprintf("patronymic=$%d", argId))
+		args = append(args, *client.Patronymic)
+		argId++
+	}
+	if client.Age != nil {
+		setValues = append(setValues, fmt.Sprintf("age=$%d", argId))
+		args = append(args, *client.Age)
+		argId++
+	}
+	if client.Gender != nil {
+		setValues = append(setValues, fmt.Sprintf("gender=$%d", argId))
+		args = append(args, *client.Gender)
+		argId++
+	}
+	if client.CountryId != nil {
+		setValues = append(setValues, fmt.Sprintf("country_id=$%d", argId))
+		args = append(args, *client.CountryId)
+		argId++
+	}
+
+	setQuery := strings.Join(setValues, ", ")
+	query := fmt.Sprintf(`UPDATE %s SET %s WHERE id = %d`, clientsTable, setQuery, id)
+
+	_, err := r.db.Exec(query, args...)
+
+	return err
+}
+
+func (r *RecordPostgres) DeleteClientById(id int) error {
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1`, clientsTable)
+	_, err := r.db.Exec(query, id)
+	return err
 }

@@ -55,5 +55,17 @@ func (s *RecordService) GetClientsByFilter(filter ClientFilter, page int) ([]Cli
 			sql += " AND "
 		}
 	}
+	if len(sql) != 0 {
+		sql = " WHERE " + sql
+	}
+
 	return s.repo.GetClientsByFilter(sql, page)
+}
+
+func (s *RecordService) UpdateClientRecord(id int, client ClientUpdate) error {
+	return s.repo.UpdateClientRecord(id, client)
+}
+
+func (s *RecordService) DeleteClientById(id int) error {
+	return s.repo.DeleteClientById(id)
 }

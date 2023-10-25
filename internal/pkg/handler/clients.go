@@ -2,6 +2,7 @@ package handler
 
 import (
 	. "fio"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,6 +13,25 @@ import (
 const (
 	defaultPage = 1
 )
+
+func (h *Handler) CreateClient(c *gin.Context) {
+	var client Client
+	if err := c.BindJSON(&client); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	id, err := h.services.Record.CreateClient(client)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"id": id,
+	})
+
+}
 
 func (h *Handler) GetClients(c *gin.Context) {
 	var filter ClientFilter
@@ -77,5 +97,45 @@ func (h *Handler) GetClients(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, clients)
+
+}
+
+func (h *Handler) UpdateClientRecord(c *gin.Context) {
+	var client ClientUpdate
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := c.BindJSON(&client); err != nil {
+		newErrorResponse(c, http.StatusOK, err.Error())
+		return
+	}
+
+	if err := h.services.UpdateClientRecord(id, client); err != nil {
+		newErrorResponse(c, http.StatusOK, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"message": fmt.Sprintf("successfully updated client with id = %d", id),
+	})
+}
+
+func (h *Handler) DeleteClientById(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := h.services.DeleteClientById(id); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusBadRequest, map[string]interface{}{
+		"message": fmt.Sprintf("successfully deleted client with id = %d", id),
+	})
 
 }
