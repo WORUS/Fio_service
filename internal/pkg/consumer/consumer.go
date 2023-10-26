@@ -3,7 +3,7 @@ package consumer
 import (
 	"encoding/json"
 	. "fio"
-	"fio/internal/pkg/service"
+	"fio/internal/pkg/rest/service"
 	"log"
 
 	kafkago "github.com/segmentio/kafka-go"

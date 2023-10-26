@@ -2,7 +2,7 @@ package consumer
 
 import (
 	. "fio"
-	"fio/internal/pkg/service"
+	"fio/internal/pkg/rest/service"
 	"log"
 )
 

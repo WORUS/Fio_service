@@ -1,0 +1,26 @@
+type Client {
+    id: ID!
+    name: String!
+    surname: String!
+    patronymic: String
+    Age: Int!
+    Gender: String!
+    CountryId: String!
+}
+
+input NeWClient {
+    name: String!
+    surname: String!
+    patronymic: String
+    Age: Int!
+    Gender: String!
+    CountryId: String!
+}
+
+type Mutation {
+    createClient(input: NeWClient!): Client!
+}
+
+type Query {
+    Clients(limit: Int = 2, offset: Int = 0): [Client!]!
+}

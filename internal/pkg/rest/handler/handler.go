@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"fio/internal/pkg/service"
+	"fio/internal/pkg/rest/service"
 
 	"github.com/gin-gonic/gin"
 )

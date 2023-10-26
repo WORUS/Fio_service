@@ -2,7 +2,7 @@ package service
 
 import (
 	. "fio"
-	"fio/internal/pkg/repository"
+	"fio/internal/pkg/rest/repository"
 	"fmt"
 	"strconv"
 	"strings"
